@@ -1,0 +1,16 @@
+{
+  "name": "advent-of-code-day1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "part:1": "node part-one.js",
+    "part:2": "node part-two.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shachar Ron Zohar",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.11.0"
+  }
+}
