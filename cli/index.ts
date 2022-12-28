@@ -1,6 +1,7 @@
 #!/usr/bin/env ts-node-esm
 
 import fs from 'fs'
+import path from 'path'
 import { Command } from 'commander'
 import config from './config.json' assert { type: 'json' }
 
@@ -14,14 +15,32 @@ program
   .action(async day => {
     console.log('Creating new day', day)
     const year = program.opts()?.year || (config.currYear ?? new Date().getFullYear())
-    await fs.promises.mkdir(`../${year}/day${day}`)
-    await fs.promises.mkdir(`../${year}/day${day}/part1`)
-    await fs.promises.mkdir(`../${year}/day${day}/part2`)
-    await Promise.all([
-      fs.promises.writeFile(`../${year}/day${day}/part1/index.ts`, 'Merry Coding!'),
-      fs.promises.writeFile(`../${year}/day${day}/part2/index.ts`, 'Merry Coding!'),
-    ])
-    fs.createReadStream('./inputception.txt', { encoding: 'utf8' }).pipe(fs.createWriteStream(`./day${day}/input.txt`))
+    await fs.promises.mkdir(`./${year}/${day}`)
+    for (let i = 1; i <= 2; i++) {
+      await fs.promises.mkdir(`./${year}/${day}/part${i}`)
+    }
+    const filePrms = []
+    for (let i = 1; i <= 2; i++) {
+      filePrms.push(
+        fs.promises.writeFile(
+          `./${year}/${day}/part${i}/index.ts`,
+          `import { loadInput } from '../../../utils/load-input.js'
+
+export default async () => {
+  const input = await loadInput('${year}', '${i}')
+
+  const ans = 0
+  return ans
+}`,
+        ),
+      )
+    }
+    // await fs.promises.mkdir(`../${year}/day${day}/part1`)
+    // await fs.promises.mkdir(`../${year}/day${day}/part2`)
+    await Promise.all(filePrms)
+    fs.createReadStream('./cli/inputception.txt', { encoding: 'utf8' }).pipe(
+      fs.createWriteStream(`./${year}/${day}/input.txt`),
+    )
   })
 
 program
@@ -29,10 +48,11 @@ program
   .description('Run a day')
   .action(async (day, part) => {
     console.log('Running day', day)
-    const year = program.opts()?.year || (config.currYear ?? new Date().getFullYear())
+    const year = program.opts()?.year || (config.currYear ?? new Date().getFullYear().toString())
     const { default: run } = await import(`../${year}/day${day}/part${part}/index.ts`)
-    const res = run()
-    fs.promises.writeFile(`../${year}/day${day}/part${part}/output.txt`, JSON.stringify(res))
+    const res = await run()
+    const resolvedPath = path.join(process.cwd(), year, 'day' + day, 'part' + part, 'output.txt')
+    fs.promises.writeFile(resolvedPath, JSON.stringify(res))
   })
 
 program

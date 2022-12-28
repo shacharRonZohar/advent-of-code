@@ -1,8 +1,13 @@
 import fs from 'fs'
+import path from 'path'
 
-export const loadInput = (path: string) => {
+export const loadInput = (year: string, day: string): Promise<string> => {
   return new Promise((resolve, reject) => {
-    const stream = fs.createReadStream(`${path}/input.txt`)
+    const resolvedPath = path.join(process.cwd(), year, day, 'input.txt')
+    console.log('🚀 ~ file: load-input.ts:7 ~ returnnewPromise ~ process.cwd()', process.cwd())
+    console.log('resolvedPath: ', resolvedPath)
+    // const resolvedPath = resolve(path)
+    const stream = fs.createReadStream(resolvedPath)
     let data = ''
 
     stream.on('data', chunk => {
